@@ -1,0 +1,37 @@
+{
+  "name": "postpack",
+  "version": "0.0.1",
+  "description": "repack xxx.min.js to reduce the size of js bundle",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "script/build.sh",
+    "test": "babel-node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wave-fe/postpack.git"
+  },
+  "keywords": [
+    "ast",
+    "codegen",
+    "traverse"
+  ],
+  "author": "li-yinan",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/wave-fe/postpack/issues"
+  },
+  "homepage": "https://github.com/wave-fe/postpack#readme",
+  "dependencies": {
+    "escodegen": "^1.9.1",
+    "escope": "^3.6.0",
+    "espree": "^3.5.4",
+    "esquery": "^1.0.1",
+    "estraverse": "^4.2.0",
+    "tracer": "^0.9.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  }
+}
