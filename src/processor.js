@@ -64,6 +64,12 @@ export function CallExpression(node) {
     node.arguments.map(traverseNode);
 }
 
+export function ContinueStatement(node) {
+    // log(node.callee);
+    setNodeUsed(node);
+    traverseNode(node.label);
+}
+
 export function ExpressionStatement(node) {
     setNodeUsed(node);
     traverseNode(node.expression);
@@ -90,6 +96,13 @@ export function ForInStatement(node) {
     traverseNode(node.body);
 }
 
+export function ForOfStatement(node) {
+    setNodeUsed(node);
+    traverseNode(node.left);
+    traverseNode(node.right);
+    traverseNode(node.body);
+}
+
 export function ForStatement(node) {
     setNodeUsed(node);
     traverseNode(node.init);
@@ -105,6 +118,11 @@ export function IfStatement(node) {
     traverseNode(node.alternate);
 }
 
+export function LabeledStatement(node) {
+    setNodeUsed(node);
+    traverseNode(node.body);
+    traverseNode(node.label);
+}
 
 export function Literal(node) {
     setNodeUsed(node);
