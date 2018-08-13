@@ -16,3 +16,8 @@ function sayHello() {
     console.log('hello~~~');
     console.log(c);
 }
+
+(function () {
+    var a = 1;
+    log(a);
+})();
