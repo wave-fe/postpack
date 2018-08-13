@@ -15,6 +15,7 @@ export function setNodeUsed(node) {
 export function setTypeUsed(node) {
     let func = processor[node.type];
     if (func) {
+        // log(node.type);
         func(node);
     }
     else {
@@ -28,6 +29,10 @@ export function setUsed(node) {
     if (!node) {
         return;
     }
+    if (node.opt.processed) {
+        return;
+    }
+    node.opt.processed = true;
     setTypeUsed(node);
     if (node.type === 'Identifier') {
         // 如果是Identifier就要计算是不是闭包里的，要找到引用到的定义，设置为使用过
@@ -84,21 +89,27 @@ let excludeNodes = [
 
 
 export function traverseNode(node) {
-    setUsed(node);
+    if (!node) {
+        return;
+    }
+    // setUsed(node);
+    if (!excludeNodes.find(type => node.type === type)) {
+        setUsed(node);
+    }
     // 遍历所有node，排除上面的node，其他的都处理
-    replace(node, {
-        enter: function (node, parent) {
-            if (!node) {
-                return;
-            }
-            if (!excludeNodes.find(type => node.type === type)) {
-                setUsed(node);
-            }
-            else {
-                // 当前节点没有被引用，则直接skip
-                this.skip();
-            }
-        }
-    });
+    // replace(node, {
+    //     enter: function (node, parent) {
+    //         if (!node) {
+    //             return;
+    //         }
+    //         if (!excludeNodes.find(type => node.type === type)) {
+    //             setUsed(node);
+    //         }
+    //         else {
+    //             // 当前节点没有被引用，则直接skip
+    //             this.skip();
+    //         }
+    //     }
+    // });
 }
 

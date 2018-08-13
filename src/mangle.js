@@ -9,7 +9,7 @@ import parseOptions from './parseOptions';
 export function process(ast) {
     let scopeManager = analyze(ast, parseOptions);
     let currentScope = scopeManager.acquire(ast);
-    setUsed(ast);
+    // setUsed(ast);
     // 设置所有node的scope
     replace(ast, {
         enter: function (node, parent) {
@@ -30,6 +30,7 @@ export function process(ast) {
     // 对所有节点进行处理
     traverseNode(ast);
 
+    // log(ast.body[0].expression.right);
     // 把没标记的node删掉
     shake(ast);
     // log(ast.body[0].declarations[0].init);
