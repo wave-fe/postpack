@@ -18,7 +18,9 @@ export function setTypeUsed(node) {
         func(node);
     }
     else {
-        setNodeUsed(node);
+        console.log(node.type + ' not support');
+        console.trace();
+        // setNodeUsed(node);
     }
 }
 

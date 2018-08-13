@@ -6,6 +6,11 @@ export function AssignmentExpression(node) {
     traverseNode(node.right);
 }
 
+export function BlockStatement(node) {
+    setNodeUsed(node);
+    node.body.map(traverseNode);
+}
+
 export function BreakStatement(node) {
     setNodeUsed(node);
 }
@@ -36,12 +41,22 @@ export function ExpressionStatement(node) {
     traverseNode(node.expression);
 }
 
+export function Literal(node) {
+    setNodeUsed(node);
+}
+
 export function MemberExpression(node) {
     setNodeUsed(node);
     traverseNode(node.object);
     traverseNode(node.property);
     // log(node.object.name);
 }
+
+export function Program(node) {
+    setNodeUsed(node);
+    node.body.map(traverseNode);
+}
+
 
 export function VariableDeclarator(node) {
     setNodeUsed(node);

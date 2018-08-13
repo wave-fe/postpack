@@ -6,7 +6,7 @@ if (b) {
     console.log(a);
     // 注释这句话，最后结果里function sayHello将被删除
     // 同时，c的所有引用消失，c也会被删除
-    // sayHello();
+    sayHello();
 }
 else {
     console.log('nonono');
