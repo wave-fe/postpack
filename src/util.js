@@ -1,15 +1,21 @@
 import * as processor from './processor';
+import * as calculator from './calculator';
 import {replace} from 'estraverse';
+import {config} from './config';
 
 export function setNodeUsed(node) {
     if (!node) {
         return;
     }
     node.opt = node.opt || {};
-    // if (!node.opt.used) {
-    //     log(node.type);
-    // }
     node.opt.used = true;
+}
+
+export function isNodeUsed(node) {
+    if (node.opt) {
+        return !!node.opt.used;
+    }
+    return false;
 }
 
 export function setTypeUsed(node) {
@@ -45,11 +51,6 @@ export function setUsed(node) {
         // 如果是Identifier就要计算是不是闭包里的，要找到引用到的定义，设置为使用过
         let variable = getClosureVariable(node);
         if (variable) {
-            // variable.defs.map(def => {
-            //     if (def.node !== node) {
-            //         setUsed(def.node);
-            //     }
-            // });
             let defs = variable.defs;
             let def = defs[defs.length - 1];
             if (def.node !== node) {
@@ -58,6 +59,10 @@ export function setUsed(node) {
             }
         }
     }
+}
+
+export function isGlobalVariable(ident) {
+    return !getClosureVariable(ident);
 }
 
 export function getClosureVariable(ident) {
@@ -78,28 +83,66 @@ let excludeNodes = [
 ];
 
 
+/**
+ * 判断是不是需要被忽略的全局变量调用
+ * 比如define 和eslxDefine，有可能定义了，但是没有被调用，应该被shake
+ * 所以，这两个名字的调用在最开始是不会被标记调用的
+ *
+ * @param {Node} node
+ *
+ * @return {boolean}
+ */
+export function isIgnoredGlobalCall(node) {
+    if (
+        node.type === 'CallExpression'
+        && isGlobalVariable(node.callee)
+    ) {
+        return !!config.ignoreGlobalVariableCall.find(item => item === node.callee.name);
+    }
+    return false;
+}
+
+export function isDefineCall(node) {
+    if (
+        node.type === 'CallExpression'
+        && ['define', 'eslxDefine'].find(item => item === node.callee.name)
+    ) {
+        return true;
+    }
+    return false;
+}
+
+export function isRequireCall(node) {
+    if (
+        node.type === 'CallExpression'
+        && node.callee.name === 'require'
+    ) {
+        return true;
+    }
+    return false;
+}
+
 export function traverseNode(node) {
     if (!node) {
         return;
     }
-    // setUsed(node);
     if (!excludeNodes.find(type => node.type === type)) {
         setUsed(node);
     }
-    // 遍历所有node，排除上面的node，其他的都处理
-    // replace(node, {
-    //     enter: function (node, parent) {
-    //         if (!node) {
-    //             return;
-    //         }
-    //         if (!excludeNodes.find(type => node.type === type)) {
-    //             setUsed(node);
-    //         }
-    //         else {
-    //             // 当前节点没有被引用，则直接skip
-    //             this.skip();
-    //         }
-    //     }
-    // });
+}
+
+export function evaluateNode(node) {
+    if (!node) {
+        return;
+    }
+    let func = calculator[node.type];
+    if (func) {
+        let ret = func(node);
+        if (ret) {
+            return ret;
+        }
+        return node;
+    }
+    return node;
 }
 

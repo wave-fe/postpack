@@ -1,4 +1,16 @@
-import {traverseNode, setNodeUsed} from './util';
+import {
+    traverseNode,
+    isIgnoredGlobalCall,
+    isRequireCall,
+    isDefineCall,
+    isNodeUsed,
+    setNodeUsed
+} from './util';
+
+import {
+    getDefine,
+    registerDefine
+} from './amd';
 
 export function ArrayExpression(node) {
     setNodeUsed(node);
@@ -58,6 +70,26 @@ export function UpdateExpression(node) {
 }
 
 export function CallExpression(node) {
+    if (isDefineCall(node)) {
+        registerDefine(node);
+        return;
+    }
+    if (
+        // 判断是不是一个require调用
+        isRequireCall(node)
+        // 并且是一个同步require调用
+        // 如let a = require('a');
+        // 排除require(['a'], function (a) {});
+        && node.arguments[0].type === 'Literal'
+    ) {
+        let ns = node.arguments[0].value;
+        // 通过amd的路径获取define的ast
+        let defineNode = getDefine(ns);
+        if (defineNode) {
+            log('require');
+            traverseNode(defineNode);
+        }
+    }
     // log(node.callee);
     setNodeUsed(node);
     traverseNode(node.callee);
@@ -71,8 +103,10 @@ export function ContinueStatement(node) {
 }
 
 export function ExpressionStatement(node) {
-    setNodeUsed(node);
     traverseNode(node.expression);
+    if(isNodeUsed(node.expression)) {
+        setNodeUsed(node);
+    }
 }
 
 export function FunctionDeclaration(node) {
