@@ -7,6 +7,8 @@ import {markDefineByRequire} from './amd';
 
 import parseOptions from './parseOptions';
 
+import uuid from 'uuid/v4';
+
 export function process(ast) {
     let scopeManager = analyze(ast, parseOptions);
     let currentScope = scopeManager.acquire(ast);
@@ -20,6 +22,8 @@ export function process(ast) {
             node.opt = node.opt || {};
             // 进入新的scope
             currentScope = scopeManager.acquire(node) || currentScope;
+            currentScope.variables.map(v => v.uuid = v.uuid || uuid());
+            // console.log(currentScope.references.map(r => r.identifier.name));
             node.scope = currentScope;
         },
         leave: function(node) {
@@ -43,6 +47,9 @@ export function process(ast) {
     traverseNode(ast);
     // 对require做特殊处理，找到所有require的模块，标记define为不删除
     markDefineByRequire(ast);
+    // console.log(ast.scope.variables.map(v => v.name));
+    // console.log(ast.scope.references.map(r => r.identifier.name));
+    // console.log(ast.scope.references);
 
     // log(ast.body[0].expression.right);
     // 把没标记的node删掉

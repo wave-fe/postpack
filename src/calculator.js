@@ -1,4 +1,8 @@
 import {evaluateNode} from './util';
+import {Global} from './globalManager';
+import uuid from 'uuid/v4';
+
+let global = new Global();
 
 function generateLiteralNode(value) {
     if (typeof value === 'number' && value < 0) {
@@ -19,6 +23,34 @@ function generateLiteralNode(value) {
     };
 }
 
+function getVariable(node, scope) {
+    let currentScope = scope;
+    while(currentScope) {
+        let variable = currentScope.set.get(node.name);
+        if (variable) {
+            return variable
+        }
+        else {
+            currentScope = currentScope.upper;
+        }
+    }
+    // 上面在scope里没找到，说明是全局变量
+    // globalScope里只有var、let、const出来的变量，像window这种变量都是没有的
+    let variable = global.getByName(node.name);
+    return variable;
+}
+
+function assignUUID(from, to) {
+    let varFrom = getVariable(from, from.scope); 
+    let varTo = getVariable(to, to.scope); 
+    if (varFrom && varTo) {
+        varTo.uuid = varFrom.uuid;
+    }
+    // console.log(from.name, to.name);
+    // to.uuid = from.uuid || to.uuid;
+    // console.log(from.uuid, to.uuid);
+}
+
 export function ArrayExpression(node) {
     node.elements = node.elements.map(evaluateNode);
 }
@@ -26,7 +58,7 @@ export function ArrayExpression(node) {
 export function AssignmentExpression(node) {
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
-    // node.operator = '-';
+    assignUUID(node.right, node.left);
     return node;
 }
 
@@ -42,7 +74,7 @@ export function BinaryExpression(node) {
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
     if (node.left.type === 'Literal' && node.left.type === 'Literal') {
-        let value = eval(node.left.value + node.operator + node.right.value); 
+        let value = eval(node.left.raw + node.operator + node.right.raw); 
         return generateLiteralNode(value);
     }
     return node;
@@ -80,6 +112,14 @@ export function UpdateExpression(node) {
 export function CallExpression(node) {
     node.callee = evaluateNode(node.callee);
     node.arguments = node.arguments.map(evaluateNode);
+    let variable = getVariable(node.callee, node.scope);
+    console.log('>>>');
+    if (variable) {
+        let isEslxDefine = global.isEqual('eslxDefine', variable.uuid);
+        console.log(isEslxDefine);
+    }
+    console.log('<<<');
+    // let variables = global.getByUUID()
     return node;
 }
 
@@ -94,7 +134,7 @@ export function ExpressionStatement(node) {
 export function FunctionDeclaration(node) {
     node.id = evaluateNode(node.id);
     node.params = node.params.map(evaluateNode);
-    node.body = node.body.map(evaluateNode);
+    node.body = evaluateNode(node.body);
     return node;
 }
 
@@ -152,6 +192,7 @@ export function LogicalExpression(node) {
 export function MemberExpression(node) {
     node.object = evaluateNode(node.object);
     node.property = evaluateNode(node.property);
+    assignUUID(node.property, node);
     return node;
 }
 

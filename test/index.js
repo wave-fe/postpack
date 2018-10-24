@@ -8,7 +8,8 @@ fs.readFile(path.join(__dirname, './test4.js'), function (err, data) {
     }
     let {code, ast} = repack(data);
     // console.log(JSON.stringify(ast, null, 4));
-    // console.log(ast.body);
+    console.log(ast.scope.variables);
+    // console.log(ast);
     console.log(code);
 });
 
