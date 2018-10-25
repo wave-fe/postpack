@@ -1,25 +1,18 @@
-let defineMap = {};
+export class Amd {
+    constructor() {
+        this.map = new Map();
+    }
 
-export function markDefineByRequire() {
-}
+    register(node) {
+        if (node.type !== 'CallExpression') {
+            return;
+        }
+        // 针对define('xxx', function () {})的定义
+        let namespace = node.arguments[0].value;
+        this.map.set(namespace, node);
+    }
 
-/**
- * 通过namespace获取define的ast
- *
- * @param {string} ns namespace
- *
- * @return {Object|undefined} ast
- */
-export function getDefine(ns) {
-    return;
-}
-
-
-export function registerDefine(node) {
-    let ns = node.arguments[0].value;
-    defineMap[ns] = node;
-}
-
-export function clearDefine() {
-    defineMap = {};
+    isUsed(namespace) {
+        return this.map.has(namespace);
+    }
 }

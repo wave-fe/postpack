@@ -1,8 +1,14 @@
 import {evaluateNode} from './util';
 import {Global} from './globalManager';
 import uuid from 'uuid/v4';
+import {Amd} from './amd';
 
 let global = new Global();
+let amd = new Amd();
+
+function isDefine(uuid) {
+    return global.isEqual('define', uuid) || global.isEqual('eslxDefine', uuid);
+}
 
 function generateLiteralNode(value) {
     if (typeof value === 'number' && value < 0) {
@@ -40,12 +46,20 @@ function getVariable(node, scope) {
     return variable;
 }
 
+function getUUID(node) {
+    let variable = getVariable(node, node.scope);
+    if (variable) {
+        return variable.uuid;
+    }
+    return node.uuid;
+}
+
 function assignUUID(from, to) {
     let varFrom = getVariable(from, from.scope); 
     let varTo = getVariable(to, to.scope); 
-    if (varFrom && varTo) {
-        varTo.uuid = varFrom.uuid;
-    }
+    // 有variable就给variable赋值，对应Identifier
+    // 其他的类型没有variable，就给node赋值
+    (varTo || to).uuid = (varFrom || from).uuid;
     // console.log(from.name, to.name);
     // to.uuid = from.uuid || to.uuid;
     // console.log(from.uuid, to.uuid);
@@ -97,6 +111,8 @@ export function EmptyStatement(node) {
 }
 
 export function Identifier(node) {
+    node.uuid = uuid();
+    return node;
 }
 
 export function UnaryExpression(node) {
@@ -112,12 +128,14 @@ export function UpdateExpression(node) {
 export function CallExpression(node) {
     node.callee = evaluateNode(node.callee);
     node.arguments = node.arguments.map(evaluateNode);
-    let variable = getVariable(node.callee, node.scope);
+    let uuid = getUUID(node.callee);
     console.log('>>>');
-    if (variable) {
-        let isEslxDefine = global.isEqual('eslxDefine', variable.uuid);
-        console.log(isEslxDefine);
+    if (isDefine(uuid)) {
+        amd.register(node);
+        console.log('!!!是否存在hello', amd.isUsed('hello'));
+        console.log('!!!是否存在world', amd.isUsed('world'));
     }
+
     console.log('<<<');
     // let variables = global.getByUUID()
     return node;
@@ -186,6 +204,24 @@ export function Literal(node) {
 export function LogicalExpression(node) {
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
+    var leftVar = getVariable(node.left);
+    var rightVar = getVariable(node.right);
+    if (node.operator === '&&') {
+        if (leftVar) {
+            assignUUID(node.right, node);
+        }
+        else {
+            assignUUID(node.left, node);
+        }
+    }
+    else if (node.operator === '||') {
+        if (leftVar) {
+            assignUUID(node.left, node);
+        }
+        else {
+            assignUUID(node.right, node);
+        }
+    }
     return node;
 }
 

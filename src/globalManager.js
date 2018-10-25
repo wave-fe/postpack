@@ -7,7 +7,11 @@ export class Global {
 
     constructor() {
         this.map = new Map();
-        ['window', 'esl', 'eslxDefine'].map(k => this.add(k));
+        ['window', 'define', 'eslxDefine'].map(k => this.add(k));
+    }
+
+    has(name) {
+        return this.map.has(name);
     }
 
     add(name) {
@@ -41,14 +45,14 @@ export class Global {
         if (variable) {
             return variable;
         }
-        else {
-            return this.add(name);
-        }
     }
 
     isEqual(name, uuid) {
         let variable = this.getByName(name);
-        return variable.uuid === uuid;
+        if (variable) {
+            return variable.uuid === uuid;
+        }
+        return false;
     }
 
 }

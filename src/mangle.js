@@ -3,7 +3,6 @@ import esquery from 'esquery';
 import {analyze} from 'escope';
 import {shake} from './shake';
 import {traverseNode, setUsed, evaluateNode} from './util';
-import {markDefineByRequire} from './amd';
 
 import parseOptions from './parseOptions';
 
@@ -46,7 +45,6 @@ export function process(ast) {
     // 对所有节点进行处理
     traverseNode(ast);
     // 对require做特殊处理，找到所有require的模块，标记define为不删除
-    markDefineByRequire(ast);
     // console.log(ast.scope.variables.map(v => v.name));
     // console.log(ast.scope.references.map(r => r.identifier.name));
     // console.log(ast.scope.references);
