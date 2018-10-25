@@ -102,26 +102,6 @@ export function isIgnoredGlobalCall(node) {
     return false;
 }
 
-export function isDefineCall(node) {
-    if (
-        node.type === 'CallExpression'
-        && ['define', 'eslxDefine'].find(item => item === node.callee.name)
-    ) {
-        return true;
-    }
-    return false;
-}
-
-export function isRequireCall(node) {
-    if (
-        node.type === 'CallExpression'
-        && node.callee.name === 'require'
-    ) {
-        return true;
-    }
-    return false;
-}
-
 export function traverseNode(node) {
     if (!node) {
         return;

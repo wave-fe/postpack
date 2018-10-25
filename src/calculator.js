@@ -1,14 +1,17 @@
 import {evaluateNode} from './util';
-import {Global} from './globalManager';
+import {global} from './globalManager';
 import uuid from 'uuid/v4';
-import {Amd} from './amd';
+import {amd} from './amd';
 
-let global = new Global();
-let amd = new Amd();
 
 function isDefine(uuid) {
     return global.isEqual('define', uuid) || global.isEqual('eslxDefine', uuid);
 }
+
+function isRequire(uuid) {
+    return global.isEqual('require', uuid) || global.isEqual('eslxRequire', uuid);
+}
+
 
 function generateLiteralNode(value) {
     if (typeof value === 'number' && value < 0) {
@@ -129,14 +132,15 @@ export function CallExpression(node) {
     node.callee = evaluateNode(node.callee);
     node.arguments = node.arguments.map(evaluateNode);
     let uuid = getUUID(node.callee);
-    console.log('>>>');
+
     if (isDefine(uuid)) {
-        amd.register(node);
-        console.log('!!!是否存在hello', amd.isUsed('hello'));
-        console.log('!!!是否存在world', amd.isUsed('world'));
+        amd.registerDefine(node);
     }
 
-    console.log('<<<');
+    if (isRequire(uuid)) {
+        amd.registerRequire(node);
+    }
+
     // let variables = global.getByUUID()
     return node;
 }

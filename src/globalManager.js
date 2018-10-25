@@ -7,7 +7,13 @@ export class Global {
 
     constructor() {
         this.map = new Map();
-        ['window', 'define', 'eslxDefine'].map(k => this.add(k));
+        [
+            'window',
+            'define',
+            'eslxDefine',
+            'require',
+            'eslxRequire'
+        ].map(k => this.add(k));
     }
 
     has(name) {
@@ -56,3 +62,4 @@ export class Global {
     }
 
 }
+export let global = new Global();
