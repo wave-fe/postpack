@@ -232,7 +232,14 @@ export function LogicalExpression(node) {
 export function MemberExpression(node) {
     node.object = evaluateNode(node.object);
     node.property = evaluateNode(node.property);
-    assignUUID(node.property, node);
+    if (global.isEqual('window', getUUID(node.object))) {
+        // 如果是window，就按照property的uuid给当前node赋值
+        assignUUID(node.property, node);
+    }
+    else {
+        // 如果不是，就代表是变量属性，需要一个新的uuid
+        node.uuid = uuid();
+    }
     return node;
 }
 

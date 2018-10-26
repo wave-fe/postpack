@@ -25,7 +25,7 @@ export function process(ast) {
             // console.log(currentScope.references.map(r => r.identifier.name));
             node.scope = currentScope;
         },
-        leave: function(node) {
+        leave: function (node) {
             currentScope = scopeManager.release(node) || currentScope;
             // do stuff
         }

@@ -11,6 +11,14 @@ export function setNodeUsed(node) {
     node.opt.used = true;
 }
 
+export function setNodeUnUsed(node) {
+    if (!node) {
+        return;
+    }
+    node.opt = node.opt || {};
+    node.opt.used = false;
+}
+
 export function isNodeUsed(node) {
     if (node.opt) {
         return !!node.opt.used;
