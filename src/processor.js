@@ -1,6 +1,7 @@
 import {
     getUUID,
-    isRequire,
+    isGlobalRequire,
+    isRequireNode,
     traverseNode,
     isNodeUsed,
     setNodeUsed
@@ -73,10 +74,10 @@ export function CallExpression(node) {
     node.arguments.map(traverseNode);
     // 遍历define
     let uuid = getUUID(node.callee);
-    if (isRequire(uuid)) {
+    if (isRequireNode(node.callee)) {
         let namespace = node.arguments[0].value;
         let def = amd.getDefineByNamespace(namespace);
-        // log('>>>');
+        log('>>>');
         traverseNode(def, true);
         //console.log(def);
         // log('<<<');

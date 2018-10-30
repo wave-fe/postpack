@@ -13,6 +13,6 @@ def('test', ["require","exports","module"], function (require, exports, module) 
     console.log(hello);
 });
 def('hello', ["require","exports","module"], function (require, exports, module) {
-    console.log(hello);
+    require('test');
 });
 req('hello');

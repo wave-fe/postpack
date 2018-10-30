@@ -133,10 +133,27 @@ export function isDefine(uuid) {
     return global.isEqual('define', uuid) || global.isEqual('eslxDefine', uuid);
 }
 
-export function isRequire(uuid) {
+export function isGlobalRequire(uuid) {
     return global.isEqual('require', uuid) || global.isEqual('eslxRequire', uuid);
 }
 
+export function isRequireNode(node) {
+    let isGlobal = isGlobalRequire(getUUID(node));
+    let variable = getVariable(node, node.scope);
+    if (isGlobal) {
+        return true;
+    }
+    else if (variable) {
+        return variable.isRequire;
+    }
+    else {
+        return;
+    }
+}
+
+export function markRequire(variable) {
+    variable.isRequire = true;
+}
 
 export function generateLiteralNode(value) {
     if (typeof value === 'number' && value < 0) {

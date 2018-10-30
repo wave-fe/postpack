@@ -1,7 +1,9 @@
 import {
     evaluateNode,
     isDefine,
-    isRequire,
+    isGlobalRequire,
+    isRequireNode,
+    markRequire,
     generateLiteralNode,
     getVariable,
     getUUID,
@@ -80,11 +82,17 @@ export function CallExpression(node) {
 
     if (isDefine(uuid)) {
         amd.registerDefine(node);
+        // 找到define里依赖的require
+        // 如这里define('xxx', ['require'], function(r) {});
+        // 找到r这个变量，标记为require
+        let argIndex = node.arguments[1].elements.findIndex(el => el.value === 'require');
+        let requireNode = node.arguments[2].params[argIndex];
+        let requireVariable = getVariable(requireNode, requireNode.scope);
+        // 标记当前变量为require
+        markRequire(requireVariable);
+        // log(requireNode.scope);
     }
 
-    if (isRequire(uuid)) {
-        amd.registerRequire(node);
-    }
 
     // let variables = global.getByUUID()
     return node;
