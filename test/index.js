@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import {amd} from '../src/amd';
 
-fs.readFile(path.join(__dirname, './test4.js'), function (err, data) {
+fs.readFile(path.join(__dirname, './test5.js'), function (err, data) {
     if (err) {
         throw err;
     }

@@ -200,6 +200,9 @@ export function getUUID(node) {
 }
 
 export function assignUUID(from, to) {
+    if (!from || !to) {
+        return;
+    }
     let varFrom = getVariable(from, from.scope); 
     let varTo = getVariable(to, to.scope); 
     // 有variable就给variable赋值，对应Identifier

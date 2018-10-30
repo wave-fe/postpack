@@ -37,10 +37,10 @@ export function BreakStatement(node) {
 export function BinaryExpression(node) {
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
-    if (node.left.type === 'Literal' && node.left.type === 'Literal') {
-        let value = eval(node.left.raw + node.operator + node.right.raw); 
-        return generateLiteralNode(value);
-    }
+    // if (node.left.type === 'Literal' && node.left.type === 'Literal') {
+    //     let value = eval(node.left.raw + node.operator + node.right.raw); 
+    //     return generateLiteralNode(value);
+    // }
     return node;
 }
 
@@ -264,6 +264,7 @@ export function VariableDeclaration(node) {
 export function VariableDeclarator(node) {
     node.id = evaluateNode(node.id);
     node.init = evaluateNode(node.init);
+    assignUUID(node.init, node.id);
     return node;
 }
 
