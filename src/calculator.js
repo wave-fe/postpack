@@ -1,72 +1,17 @@
-import {evaluateNode} from './util';
+import {
+    evaluateNode,
+    isDefine,
+    isRequire,
+    generateLiteralNode,
+    getVariable,
+    getUUID,
+    assignUUID
+} from './util';
+
 import {global} from './globalManager';
-import uuid from 'uuid/v4';
 import {amd} from './amd';
 
-
-function isDefine(uuid) {
-    return global.isEqual('define', uuid) || global.isEqual('eslxDefine', uuid);
-}
-
-function isRequire(uuid) {
-    return global.isEqual('require', uuid) || global.isEqual('eslxRequire', uuid);
-}
-
-
-function generateLiteralNode(value) {
-    if (typeof value === 'number' && value < 0) {
-        return {
-            type: 'UnaryExpression',
-            operator: '-',
-            argument: {
-                type: 'Literal',
-                value: -value,
-                raw: JSON.stringify(-value)
-            }
-        };
-    }
-    return {
-        type: 'Literal',
-        value: value,
-        raw: JSON.stringify(value)
-    };
-}
-
-function getVariable(node, scope) {
-    let currentScope = scope;
-    while(currentScope) {
-        let variable = currentScope.set.get(node.name);
-        if (variable) {
-            return variable
-        }
-        else {
-            currentScope = currentScope.upper;
-        }
-    }
-    // 上面在scope里没找到，说明是全局变量
-    // globalScope里只有var、let、const出来的变量，像window这种变量都是没有的
-    let variable = global.getByName(node.name);
-    return variable;
-}
-
-function getUUID(node) {
-    let variable = getVariable(node, node.scope);
-    if (variable) {
-        return variable.uuid;
-    }
-    return node.uuid;
-}
-
-function assignUUID(from, to) {
-    let varFrom = getVariable(from, from.scope); 
-    let varTo = getVariable(to, to.scope); 
-    // 有variable就给variable赋值，对应Identifier
-    // 其他的类型没有variable，就给node赋值
-    (varTo || to).uuid = (varFrom || from).uuid;
-    // console.log(from.name, to.name);
-    // to.uuid = from.uuid || to.uuid;
-    // console.log(from.uuid, to.uuid);
-}
+import uuid from 'uuid/v4';
 
 export function ArrayExpression(node) {
     node.elements = node.elements.map(evaluateNode);

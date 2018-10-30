@@ -8,9 +8,11 @@ fs.readFile(path.join(__dirname, './test4.js'), function (err, data) {
         throw err;
     }
     let {code, ast} = repack(data);
-    console.log('>>>unused')
-    console.log(amd.getUnUsedDefine().forEach((k, v) => console.log(v)));
-    console.log('<<<unused')
+    // console.log('>>>unused')
+    // let defs = amd.getUnUsedDefine();
+    // console.log(defs);
+    // console.log(defs.forEach((k, v) => console.log(v)));
+    // console.log('<<<unused')
     // console.log(JSON.stringify(ast, null, 4));
     // console.log(ast.scope.variables);
     // console.log(ast);

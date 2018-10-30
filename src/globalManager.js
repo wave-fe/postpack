@@ -1,8 +1,6 @@
 import uuid from 'uuid/v4';
 import {Variable} from 'escope';
 
-let reserveWord = new Map();
-
 export class Global {
 
     constructor() {

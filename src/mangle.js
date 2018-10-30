@@ -52,7 +52,7 @@ export function process(ast) {
     // log(ast.body[0].expression.right);
     // 把没标记的node删掉
     shake(ast);
-    // console.log(ast.body[0]);
+    console.log(ast.body[0]);
     // log(ast.body[0].declarations[0].init);
     return ast;
 }

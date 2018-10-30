@@ -3,6 +3,9 @@ import * as calculator from './calculator';
 import {replace} from 'estraverse';
 import {config} from './config';
 
+import {global} from './globalManager';
+import uuid from 'uuid/v4';
+
 export function setNodeUsed(node) {
     if (!node) {
         return;
@@ -90,31 +93,23 @@ let excludeNodes = [
     'VariableDeclaration', 'VariableDeclarator', 'FunctionDeclaration' 
 ];
 
-
-/**
- * 判断是不是需要被忽略的全局变量调用
- * 比如define 和eslxDefine，有可能定义了，但是没有被调用，应该被shake
- * 所以，这两个名字的调用在最开始是不会被标记调用的
- *
- * @param {Node} node
- *
- * @return {boolean}
- */
-export function isIgnoredGlobalCall(node) {
-    if (
+function isExcludeNode(node) {
+    // 先搜索排除列表
+    return excludeNodes.find(type => node.type === type)
+    // 再看是否是define，define在第一次的时候排除，等到require的时候再处理
+    || (
+        // 当前node是CallExpression
         node.type === 'CallExpression'
-        && isGlobalVariable(node.callee)
-    ) {
-        return !!config.ignoreGlobalVariableCall.find(item => item === node.callee.name);
-    }
-    return false;
+        // 并且callee是define
+        && isDefine(getUUID(node.callee))
+    ) ;
 }
 
-export function traverseNode(node) {
+export function traverseNode(node, force) {
     if (!node) {
         return;
     }
-    if (!excludeNodes.find(type => node.type === type)) {
+    if (force === true || !isExcludeNode(node)) {
         setUsed(node);
     }
 }
@@ -134,3 +129,66 @@ export function evaluateNode(node) {
     return node;
 }
 
+export function isDefine(uuid) {
+    return global.isEqual('define', uuid) || global.isEqual('eslxDefine', uuid);
+}
+
+export function isRequire(uuid) {
+    return global.isEqual('require', uuid) || global.isEqual('eslxRequire', uuid);
+}
+
+
+export function generateLiteralNode(value) {
+    if (typeof value === 'number' && value < 0) {
+        return {
+            type: 'UnaryExpression',
+            operator: '-',
+            argument: {
+                type: 'Literal',
+                value: -value,
+                raw: JSON.stringify(-value)
+            }
+        };
+    }
+    return {
+        type: 'Literal',
+        value: value,
+        raw: JSON.stringify(value)
+    };
+}
+
+export function getVariable(node, scope) {
+    let currentScope = scope;
+    while(currentScope) {
+        let variable = currentScope.set.get(node.name);
+        if (variable) {
+            return variable
+        }
+        else {
+            currentScope = currentScope.upper;
+        }
+    }
+    // 上面在scope里没找到，说明是全局变量
+    // globalScope里只有var、let、const出来的变量，像window这种变量都是没有的
+    let variable = global.getByName(node.name);
+    return variable;
+}
+
+export function getUUID(node) {
+    let variable = getVariable(node, node.scope);
+    if (variable) {
+        return variable.uuid;
+    }
+    return node.uuid;
+}
+
+export function assignUUID(from, to) {
+    let varFrom = getVariable(from, from.scope); 
+    let varTo = getVariable(to, to.scope); 
+    // 有variable就给variable赋值，对应Identifier
+    // 其他的类型没有variable，就给node赋值
+    (varTo || to).uuid = (varFrom || from).uuid;
+    // console.log(from.name, to.name);
+    // to.uuid = from.uuid || to.uuid;
+    // console.log(from.uuid, to.uuid);
+}

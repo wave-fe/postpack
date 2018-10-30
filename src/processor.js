@@ -1,14 +1,12 @@
 import {
+    getUUID,
+    isRequire,
     traverseNode,
-    isIgnoredGlobalCall,
     isNodeUsed,
     setNodeUsed
 } from './util';
 
-import {
-    getDefine,
-    registerDefine
-} from './amd';
+import {amd} from './amd';
 
 export function ArrayExpression(node) {
     setNodeUsed(node);
@@ -69,9 +67,20 @@ export function UpdateExpression(node) {
 
 export function CallExpression(node) {
     // log(node.callee);
+    // console.log('>>>', node.callee.name);
     setNodeUsed(node);
     traverseNode(node.callee);
     node.arguments.map(traverseNode);
+    // 遍历define
+    let uuid = getUUID(node.callee);
+    if (isRequire(uuid)) {
+        let namespace = node.arguments[0].value;
+        let def = amd.getDefineByNamespace(namespace);
+        // log('>>>');
+        traverseNode(def, true);
+        //console.log(def);
+        // log('<<<');
+    }
 }
 
 export function ContinueStatement(node) {
@@ -81,12 +90,18 @@ export function ContinueStatement(node) {
 }
 
 export function ExpressionStatement(node) {
+    setNodeUsed(node);
     traverseNode(node.expression);
-    if(isNodeUsed(node.expression)) {
-        setNodeUsed(node);
-    }
+    // if(isNodeUsed(node.expression)) {
+    //     setNodeUsed(node);
+    // }
 }
 
+/**
+ * FunctionDeclaration会在traverseNode的时候略过，
+ * 只有被其他语句显式调用时会走到这里
+ * 详见traverseNode实现
+ */
 export function FunctionDeclaration(node) {
     setNodeUsed(node);
     traverseNode(node.id);

@@ -5,7 +5,10 @@ export function shake(ast) {
         enter: function (node, parent) {
             if (!node.opt || !node.opt.used) {
                 // log(node);
-                this.remove();
+                // this.remove();
+                return {
+                    type: 'EmptyStatement'
+                };
             }
         }
     });

@@ -1,3 +1,4 @@
+import {getUUID} from './util';
 export class Amd {
     constructor() {
         this.define = new Map();
@@ -34,6 +35,10 @@ export class Amd {
             }
         }
         return ret;
+    }
+
+    getDefineByNamespace(namespace) {
+        return this.define.get(namespace);
     }
 }
 

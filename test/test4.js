@@ -7,6 +7,8 @@ def = window.define || window.eslxDefine;
 req = window.require || window.eslxRequire;
 a = b;
 con.log(a + b, c);
+function helloA() {
+}
 def('test', ["require","exports","module"], function (require, exports, module) {
     console.log(hello);
 });
