@@ -3,6 +3,7 @@ import {
     isDefine,
     isGlobalRequire,
     isRequireNode,
+    isModuleDefine,
     markRequire,
     generateLiteralNode,
     getVariable,
@@ -80,17 +81,28 @@ export function CallExpression(node) {
     node.arguments = node.arguments.map(evaluateNode);
     let uuid = getUUID(node.callee);
 
-    if (isDefine(uuid)) {
-        amd.registerDefine(node);
-        // 找到define里依赖的require
-        // 如这里define('xxx', ['require'], function(r) {});
-        // 找到r这个变量，标记为require
-        let argIndex = node.arguments[1].elements.findIndex(el => el.value === 'require');
-        let requireNode = node.arguments[2].params[argIndex];
-        let requireVariable = getVariable(requireNode, requireNode.scope);
-        // 标记当前变量为require
-        markRequire(requireVariable);
-        // log(requireNode.scope);
+    if (isDefine(uuid) && isModuleDefine(node)) {
+        try {
+            amd.registerDefine(node);
+            // 找到define里依赖的require
+            // 如这里define('xxx', ['require'], function(r) {});
+            // 找到r这个变量，标记为require
+            let argIndex = node.arguments[1].elements.findIndex(el => el.value === 'require');
+            let requireNode = node.arguments[2].params[argIndex];
+            // 有可能是这样的形式
+            // define('xxx', ['require'], function() {});
+            // function的参数是空的，所以requireNode有可能是undefined
+            if (requireNode) {
+                let requireVariable = getVariable(requireNode, requireNode.scope);
+                // 标记当前变量为require
+                markRequire(requireVariable);
+                // log(requireNode.scope);
+            }
+        }
+        catch (e) {
+            log(node);
+            throw e;
+        }
     }
 
 

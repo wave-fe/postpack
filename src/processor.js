@@ -77,7 +77,7 @@ export function CallExpression(node) {
     if (isRequireNode(node.callee)) {
         let namespace = node.arguments[0].value;
         let def = amd.getDefineByNamespace(namespace);
-        log('>>>');
+        // log('>>>');
         traverseNode(def, true);
         //console.log(def);
         // log('<<<');
@@ -227,6 +227,7 @@ export function ThrowStatement(node) {
 export function TryStatement(node) {
     setNodeUsed(node);
     traverseNode(node.block);
+    traverseNode(node.handler);
     traverseNode(node.finalizer);
 }
 

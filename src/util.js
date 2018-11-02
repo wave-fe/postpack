@@ -64,7 +64,7 @@ export function setUsed(node) {
         if (variable) {
             let defs = variable.defs;
             let def = defs[defs.length - 1];
-            if (def.node !== node) {
+            if (def && def.node !== node) {
                 // log(def.node);
                 setUsed(def.node);
             }
@@ -211,4 +211,11 @@ export function assignUUID(from, to) {
     // console.log(from.name, to.name);
     // to.uuid = from.uuid || to.uuid;
     // console.log(from.uuid, to.uuid);
+}
+
+export function isModuleDefine(node) {
+    let args = node.arguments;
+    return args[0].type === 'Literal'
+    && args[1].type === 'ArrayExpression'
+    && args[2].type === 'FunctionExpression';
 }
