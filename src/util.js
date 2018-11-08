@@ -4,6 +4,8 @@ import {replace} from 'estraverse';
 import {config} from './config';
 
 import {global} from './globalManager';
+import {ref} from './ref';
+
 import uuid from 'uuid/v4';
 
 export function setNodeUsed(node) {
@@ -90,7 +92,7 @@ export function getClosureVariable(ident) {
 
 // 先设置变量定义、function定义为删除的，如果被其他node引用，则在后续操作里改为不删除
 let excludeNodes = [
-    'VariableDeclaration', 'VariableDeclarator', 'FunctionDeclaration' 
+    'VariableDeclaration', 'VariableDeclarator', 'FunctionDeclaration' , 'FunctionExpression'
 ];
 
 function isExcludeNode(node) {
@@ -121,6 +123,7 @@ export function evaluateNode(node) {
     let func = calculator[node.type];
     if (func) {
         let ret = func(node);
+    log(node.type, node.name, node.uuid);
         if (ret) {
             return ret;
         }
@@ -207,7 +210,10 @@ export function assignUUID(from, to) {
     let varTo = getVariable(to, to.scope); 
     // 有variable就给variable赋值，对应Identifier
     // 其他的类型没有variable，就给node赋值
-    (varTo || to).uuid = (varFrom || from).uuid;
+    let uuid = (varFrom || from).uuid;
+    // 既给variable赋值uuid，也给node赋值uuid
+    setUUID(varTo, uuid);
+    setUUID(to, uuid);
     // console.log(from.name, to.name);
     // to.uuid = from.uuid || to.uuid;
     // console.log(from.uuid, to.uuid);
@@ -218,4 +224,17 @@ export function isModuleDefine(node) {
     return args[0].type === 'Literal'
     && args[1].type === 'ArrayExpression'
     && args[2].type === 'FunctionExpression';
+}
+
+export function setUUID(node, id) {
+    if (!node) {
+        return;
+    }
+    return ref.add(node, id);
+}
+
+export function isType(obj, type) {
+    // console.log(obj);
+    // console.log(({}).toString.call(obj));
+    return ({}).toString.call(obj) === '[object ' + type + ']';
 }

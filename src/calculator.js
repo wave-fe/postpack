@@ -8,16 +8,17 @@ import {
     generateLiteralNode,
     getVariable,
     getUUID,
+    setUUID,
     assignUUID
 } from './util';
 
 import {global} from './globalManager';
 import {amd} from './amd';
-
-import uuid from 'uuid/v4';
+import {ref} from './ref';
 
 export function ArrayExpression(node) {
     node.elements = node.elements.map(evaluateNode);
+    return node;
 }
 
 export function AssignmentExpression(node) {
@@ -38,6 +39,9 @@ export function BreakStatement(node) {
 export function BinaryExpression(node) {
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
+    // BinaryExpression经过计算后都会得出新的值
+    // uuid一定与之前不同
+    setUUID(node);
     // if (node.left.type === 'Literal' && node.left.type === 'Literal') {
     //     let value = eval(node.left.raw + node.operator + node.right.raw); 
     //     return generateLiteralNode(value);
@@ -62,7 +66,7 @@ export function EmptyStatement(node) {
 }
 
 export function Identifier(node) {
-    node.uuid = uuid();
+    setUUID(node);
     return node;
 }
 
@@ -82,6 +86,7 @@ export function CallExpression(node) {
     let uuid = getUUID(node.callee);
 
     if (isDefine(uuid) && isModuleDefine(node)) {
+        // amd模块的处理
         try {
             amd.registerDefine(node);
             // 找到define里依赖的require
@@ -105,12 +110,16 @@ export function CallExpression(node) {
         }
     }
 
+    // let uid = getUUID(node.callee);
+    // let refs = ref.getByUUID(node.callee.uuid);
+    // log(uid, refs);
 
     // let variables = global.getByUUID()
     return node;
 }
 
 export function ContinueStatement(node) {
+    return node;
 }
 
 export function ExpressionStatement(node) {
@@ -203,8 +212,12 @@ export function MemberExpression(node) {
     }
     else {
         // 如果不是，就代表是变量属性，需要一个新的uuid
-        node.uuid = uuid();
+        setUUID(node);
     }
+    let uuid = getUUID(node.object);
+    let obj = ref.getByUUID(uuid);
+    log(obj);
+
     return node;
 }
 

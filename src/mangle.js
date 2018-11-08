@@ -2,11 +2,14 @@ import {replace} from 'estraverse';
 import esquery from 'esquery';
 import {analyze} from 'escope';
 import {shake} from './shake';
-import {traverseNode, setUsed, evaluateNode} from './util';
+import {
+    traverseNode,
+    setUsed,
+    setUUID,
+    evaluateNode
+} from './util';
 
 import parseOptions from './parseOptions';
-
-import uuid from 'uuid/v4';
 
 export function process(ast) {
     let scopeManager = analyze(ast, parseOptions);
@@ -21,9 +24,11 @@ export function process(ast) {
             node.opt = node.opt || {};
             // 进入新的scope
             currentScope = scopeManager.acquire(node) || currentScope;
-            currentScope.variables.map(v => v.uuid = v.uuid || uuid());
+            currentScope.variables.map(v => setUUID(v));
             // console.log(currentScope.references.map(r => r.identifier.name));
             node.scope = currentScope;
+
+            setUUID(node);
         },
         leave: function (node) {
             currentScope = scopeManager.release(node) || currentScope;
@@ -51,6 +56,7 @@ export function process(ast) {
 
     // log(ast.body[0].expression.right);
     // 把没标记的node删掉
+    // log(ast.body[0].expression.callee.params);
     shake(ast);
     // console.log(ast.body[0]);
     // log(ast.body[0].declarations[0].init);

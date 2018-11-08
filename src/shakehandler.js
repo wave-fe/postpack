@@ -12,6 +12,12 @@ function genUndefinedNode() {
     };
 }
 
+function genNode(type, args = {}) {
+    return Object.assign({
+        type
+    }, args);
+}
+
 export function ArrayExpression(node) {
     // 数组缺项用undefined补上
     // node.elements = node.elements.map(item => item || genUndefinedNode());
@@ -65,6 +71,7 @@ export function FunctionDeclaration(node) {
 }
 
 export function FunctionExpression(node) {
+    node.body = node.body || genNode('BlockStatement', {body: []});
 }
 
 export function ForInStatement(node) {

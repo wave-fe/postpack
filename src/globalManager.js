@@ -1,5 +1,9 @@
-import uuid from 'uuid/v4';
 import {Variable} from 'escope';
+import {
+    setUUID
+} from './util';
+
+import uuid from 'uuid/v4';
 
 export class Global {
 
@@ -19,18 +23,21 @@ export class Global {
     }
 
     add(name) {
-        let id = uuid();
         let variable = new Variable(name);
+        let id = uuid();
         variable.uuid = id;
+
+        // 这里为什么不这么写？因为循环引用node竟然没法初始化，setUUID的模块里所有import都是未初始化状态，会报错
+        // let id = setUUID(variable);
         // 全局变量名称索引
         this.map.set(name, variable);
         // uuid索引数组，因为变量可能指向同一个uuid
         // 可以理解为Identifier指向Variable，Variable的uuid代表内存
-        let uuidSet = this.map.get(uuid);
+        let uuidSet = this.map.get(id);
         if (!uuidSet) {
-            this.map.set(uuid, []);
+            this.map.set(id, []);
         }
-        this.map.get(uuid).push(variable);
+        this.map.get(id).push(variable);
         return variable;
     }
 
