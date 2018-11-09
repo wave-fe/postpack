@@ -8,6 +8,10 @@ import {ref} from './ref';
 
 import uuid from 'uuid/v4';
 
+export function isUsed(node) {
+    return node && node.opt && node.opt.used;
+}
+
 export function setNodeUsed(node) {
     if (!node) {
         return;
@@ -120,11 +124,11 @@ export function evaluateNode(node) {
     let func = calculator[node.type];
     if (func) {
         let ret = func(node);
-        log(node.type, node.name || node.value, node.uuid);
-        setTimeout(function () {
-            // 延迟打印，可以得到所有代码处理完之后的uuid
-            log(node.type, node.name || node.value, node.uuid);
-        }, 0);
+        // log(node.type, node.name || node.value, node.uuid);
+        // setTimeout(function () {
+        //     // 延迟打印，可以得到所有代码处理完之后的uuid
+        //     log(node.type, node.name || node.value, node.uuid);
+        // }, 0);
         if (ret) {
             return ret;
         }

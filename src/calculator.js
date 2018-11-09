@@ -234,7 +234,7 @@ export function MemberExpression(node) {
     // 传递数组内部元素的引用
     let obj = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'ArrayExpression');
     let key = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Literal');
-    log('obj>>>', node.object.name, getUUID(node.object));
+    // log('obj>>>', node.object.name, getUUID(node.object));
     if (obj && key) {
         let index = key.value;
         // 数组中的元素
@@ -243,6 +243,7 @@ export function MemberExpression(node) {
         if (item) {
             // 把元素的uuid传递给node
             assignUUID(item, node);
+            // log(item);
         }
     }
 
@@ -277,6 +278,7 @@ export function Program(node) {
 export function ReturnStatement(node) {
     node.argument = evaluateNode(node.argument);
     assignUUID(node.argument, node);
+    log(node.scope);
     return node;
 }
 

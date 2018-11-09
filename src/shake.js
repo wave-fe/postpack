@@ -1,4 +1,5 @@
 import {replace} from 'estraverse';
+import {isUsed} from './util';
 import * as handler from './shakehandler';
 
 /**
@@ -14,19 +15,30 @@ export function fixNode(node) {
     }
     let func = handler[node.type];
     if (func) {
-        func(node);
+        return func(node);
+    }
+    else {
+        log('shake handler: ', node.type, ' is not found');
     }
 }
 
 export function shake(ast) {
     replace(ast, {
         enter: function (node, parent) {
-            if (!node.opt || !node.opt.used) {
-                this.remove();
+            // log(node.type, node.name || node.value);
+            if (!isUsed(node)) {
+                let newNode = fixNode(node);
+                if (newNode) {
+                    return newNode;
+                }
+                else {
+                    this.remove();
+                }
             }
-        },
-        leave: function (node, parent) {
-            fixNode(node);
+            else if (node.type === 'ArrayExpression') {
+                // array要特殊处理，因为里面的元素remove以后就不占位了，会导致位置错乱
+                return handler.ArrayExpression(node);
+            }
         }
     });
     return ast;

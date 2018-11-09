@@ -1,14 +1,21 @@
+import {isUsed} from './util';
 
 function genEmptyNode() {
     return {
-        type: 'EmptyStatement'
+        type: 'EmptyStatement',
+        opt: {
+            used: true
+        }
     };
 }
 
 function genUndefinedNode() {
     return {
         type: 'Identifier',
-        name: 'undefined'
+        name: 'undefined',
+        opt: {
+            used: true
+        }
     };
 }
 
@@ -20,7 +27,9 @@ function genNode(type, args = {}) {
 
 export function ArrayExpression(node) {
     // 数组缺项用undefined补上
-    // node.elements = node.elements.map(item => item || genUndefinedNode());
+    node.elements = node.elements.map(item => {
+        return isUsed(item) ? item : genUndefinedNode();
+    });
 }
 
 export function AssignmentExpression(node) {

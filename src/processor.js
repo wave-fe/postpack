@@ -8,6 +8,7 @@ import {
 } from './util';
 
 import {amd} from './amd';
+import {ref} from './ref';
 
 export function ArrayExpression(node) {
     setNodeUsed(node);
@@ -84,6 +85,11 @@ export function CallExpression(node) {
         traverseNode(def, true);
         //console.log(def);
         // log('<<<');
+    }
+    let callee = ref.getByUUID(getUUID(node.callee)).find(item => /Function/.test(item.type));
+    if (callee) {
+        // 找到callee，强制mark
+        traverseNode(callee, true);
     }
 }
 
