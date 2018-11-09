@@ -17,11 +17,15 @@ export class Ref {
         let lastUUID = getUUID(node);
         node.uuid = newUUID;
         // 创建索引
+        let set;
         if (!this.map.has(newUUID)) {
-            let newSet = new Set();
-            this.map.set(newUUID, newSet);
-            newSet.add(node);
+            set = new Set();
+            this.map.set(newUUID, set);
         }
+        else {
+            set = this.map.get(newUUID);
+        }
+        set.add(node);
         // 把旧索引删掉
         let lastUUIDSet = this.map.get(lastUUID);
         lastUUIDSet && lastUUIDSet.delete(node);
@@ -42,6 +46,16 @@ export class Ref {
             }
         });
         return ret;
+    }
+
+    toString() {
+        let strArr = [];
+        this.map.forEach((v, k) => {
+            let setArr = [];
+            v.forEach(item => setArr.push(item.type));
+            strArr.push(k + ' ' + setArr.join(','));
+        });
+        return '\n' + strArr.join('\n');
     }
 }
 

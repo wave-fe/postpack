@@ -1,3 +1,5 @@
-var a = [1, 2, 3];
-var b = a;
-var c = a[0];
+function aaa(arr) {
+    var a = arr[0];
+    console.log(a);
+}
+aaa([1, 2, 3]);

@@ -9,6 +9,7 @@ import {
     evaluateNode
 } from './util';
 
+import {ref} from './ref';
 import parseOptions from './parseOptions';
 
 export function process(ast) {
@@ -35,6 +36,7 @@ export function process(ast) {
             // do stuff
         }
     });
+    log(ref.toString());
     // 先对所有节点进行计算
     ast = evaluateNode(ast);
     // 有些节点是新创建的，opt没有，要补一下
@@ -58,6 +60,7 @@ export function process(ast) {
     // 把没标记的node删掉
     // log(ast.body[0].expression.callee.params);
     shake(ast);
+    log(ref.toString());
     // console.log(ast.body[0]);
     // log(ast.body[0].declarations[0].init);
     return ast;

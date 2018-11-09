@@ -34,11 +34,10 @@ export function isNodeUsed(node) {
 export function setTypeUsed(node) {
     let func = processor[node.type];
     if (func) {
-        // log(node.type);
         func(node);
     }
     else {
-        console.log(node.type + ' not support');
+        log(node.type + ' not support');
         console.trace();
         // setNodeUsed(node);
     }
@@ -51,7 +50,6 @@ export function setUsed(node) {
     if (node.opt.processed) {
         return;
     }
-    // log(node.type, node.value || node.name);
     node.opt.processed = true;
     setTypeUsed(node);
     if (
@@ -67,7 +65,6 @@ export function setUsed(node) {
             let defs = variable.defs;
             let def = defs[defs.length - 1];
             if (def && def.node !== node) {
-                // log(def.node);
                 setUsed(def.node);
             }
         }
@@ -123,7 +120,11 @@ export function evaluateNode(node) {
     let func = calculator[node.type];
     if (func) {
         let ret = func(node);
-    log(node.type, node.name, node.uuid);
+        log(node.type, node.name || node.value, node.uuid);
+        setTimeout(function () {
+            // 延迟打印，可以得到所有代码处理完之后的uuid
+            log(node.type, node.name || node.value, node.uuid);
+        }, 0);
         if (ret) {
             return ret;
         }
@@ -230,7 +231,11 @@ export function setUUID(node, id) {
     if (!node) {
         return;
     }
-    return ref.add(node, id);
+    let oldId = node.uuid;
+    // console.trace();
+    id = ref.add(node, id);
+    // node.type && log(oldId + '->' + node.uuid, node.type, node.name);
+    return id;
 }
 
 export function isType(obj, type) {

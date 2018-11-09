@@ -110,6 +110,24 @@ export function CallExpression(node) {
         }
     }
 
+    // call的时候给function的参数传递引用
+    let callee = ref.getByUUID(getUUID(node.callee)).find(item => /Function/.test(item.type));
+    if (callee) {
+        let functionArgs = callee.params;
+        // callee是function，可以传递引用给function的参数
+        // 传入的参数可以和定义的参数数量不等，这里处理一下
+        node.arguments.map((arg, index) => {
+            let functionArg = functionArgs[index];
+            if (functionArg) {
+                assignUUID(arg, functionArg);
+            }
+        });
+        evaluateNode(callee);
+        assignUUID(callee, node);
+        // 传递完参数再重新计算callee，让内部uuid正确
+
+    }
+
     // let uid = getUUID(node.callee);
     // let refs = ref.getByUUID(node.callee.uuid);
     // log(uid, refs);
@@ -131,6 +149,7 @@ export function FunctionDeclaration(node) {
     node.id = evaluateNode(node.id);
     node.params = node.params.map(evaluateNode);
     node.body = evaluateNode(node.body);
+    assignUUID(node.id, node);
     return node;
 }
 
@@ -138,6 +157,7 @@ export function FunctionExpression(node) {
     node.id = evaluateNode(node.id);
     node.params = node.params.map(evaluateNode);
     node.body = evaluateNode(node.body);
+    assignUUID(node.id, node);
     return node;
 }
 
@@ -210,13 +230,22 @@ export function MemberExpression(node) {
         // 如果是window，就按照property的uuid给当前node赋值
         assignUUID(node.property, node);
     }
-    else {
-        // 如果不是，就代表是变量属性，需要一个新的uuid
-        setUUID(node);
+
+    // 传递数组内部元素的引用
+    let obj = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'ArrayExpression');
+    let key = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Literal');
+    log('obj>>>', node.object.name, getUUID(node.object));
+    if (obj && key) {
+        let index = key.value;
+        // 数组中的元素
+        let item = obj.elements[index];
+        // log(item.type, item.name, item.uuid);
+        if (item) {
+            // 把元素的uuid传递给node
+            assignUUID(item, node);
+        }
     }
-    let uuid = getUUID(node.object);
-    let obj = ref.getByUUID(uuid);
-    log(obj);
+
 
     return node;
 }
@@ -247,6 +276,7 @@ export function Program(node) {
 
 export function ReturnStatement(node) {
     node.argument = evaluateNode(node.argument);
+    assignUUID(node.argument, node);
     return node;
 }
 
