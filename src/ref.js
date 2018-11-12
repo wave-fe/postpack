@@ -26,9 +26,11 @@ export class Ref {
             set = this.map.get(newUUID);
         }
         set.add(node);
-        // 把旧索引删掉
-        let lastUUIDSet = this.map.get(lastUUID);
-        lastUUIDSet && lastUUIDSet.delete(node);
+        if (newUUID !== lastUUID) {
+            // 把旧索引删掉
+            let lastUUIDSet = this.map.get(lastUUID);
+            lastUUIDSet && lastUUIDSet.delete(node);
+        }
         return newUUID;
     }
 
@@ -52,7 +54,7 @@ export class Ref {
         let strArr = [];
         this.map.forEach((v, k) => {
             let setArr = [];
-            v.forEach(item => setArr.push(item.type));
+            v.forEach(item => setArr.push((item.type || 'Variable') + ':' + (item.name || item.value)));
             strArr.push(k + ' ' + setArr.join(','));
         });
         return '\n' + strArr.join('\n');

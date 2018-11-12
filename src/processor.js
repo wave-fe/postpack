@@ -72,12 +72,9 @@ export function CallExpression(node) {
     // console.log('>>>', node.callee.name);
     setNodeUsed(node);
     // 标记callee是因为FunctionExpression里是这样的!function() {}();
-    // callee指向function() {}, 但是function() {}是被默认忽略的，所以要主动标记
-    setNodeUsed(node.callee);
     traverseNode(node.callee);
     node.arguments.map(traverseNode);
     // 遍历define
-    let uuid = getUUID(node.callee);
     if (isRequireNode(node.callee)) {
         let namespace = node.arguments[0].value;
         let def = amd.getDefineByNamespace(namespace);

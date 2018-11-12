@@ -1,17 +1,20 @@
-function aaa(arr) {
-    var a = arr[0];
-    var b = arr[1];
+function aa(arr) {
+    var a = arr[1];
     a();
-    b();
 }
-aaa([
+aa([
     function () {
-        console.log(1);
+        b = 1;
     },
     function () {
-        console.log(2);
+        c = 2;
+    }
+]);
+aa([
+    function () {
+        d = 3;
     },
     function () {
-        console.log(3);
+        e = 4;
     }
 ]);

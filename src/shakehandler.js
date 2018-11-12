@@ -1,27 +1,19 @@
 import {isUsed} from './util';
 
 function genEmptyNode() {
-    return {
-        type: 'EmptyStatement',
-        opt: {
-            used: true
-        }
-    };
+    return genNode('EmptyStatement');
 }
 
 function genUndefinedNode() {
-    return {
-        type: 'Identifier',
-        name: 'undefined',
-        opt: {
-            used: true
-        }
-    };
+    return genNode('Identifier', {name: 'undefined'});
 }
 
 function genNode(type, args = {}) {
     return Object.assign({
-        type
+        type,
+        opt: {
+            used: true
+        }
     }, args);
 }
 
@@ -77,10 +69,13 @@ export function ExpressionStatement(node) {
 }
 
 export function FunctionDeclaration(node) {
+    node.body = node.body || genNode('BlockStatement', {body: []});
 }
 
 export function FunctionExpression(node) {
+    // log(node.body);
     node.body = node.body || genNode('BlockStatement', {body: []});
+    // log(node.body);
 }
 
 export function ForInStatement(node) {

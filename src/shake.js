@@ -26,14 +26,17 @@ export function shake(ast) {
     replace(ast, {
         enter: function (node, parent) {
             // log(node.type, node.name || node.value);
+            // let newNode = fixNode(node);
             if (!isUsed(node)) {
-                let newNode = fixNode(node);
-                if (newNode) {
-                    return newNode;
-                }
-                else {
-                    this.remove();
-                }
+                // if (newNode) {
+                //     return newNode;
+                // }
+                // else {
+                this.remove();
+                // log(node.body[0].expression);
+                // log(node.type);
+                fixNode(node.parent);
+                // }
             }
             else if (node.type === 'ArrayExpression') {
                 // array要特殊处理，因为里面的元素remove以后就不占位了，会导致位置错乱

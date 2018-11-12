@@ -117,14 +117,16 @@ export function traverseNode(node, force) {
     }
 }
 
-export function evaluateNode(node) {
+export function evaluateNode(node, deep = false) {
     if (!node) {
         return;
     }
-    let func = calculator[node.type];
+    let funcDeep = deep === true ? calculator[node.type + 'Deep'] : undefined;
+    let func = funcDeep || calculator[node.type];
     if (func) {
+        // log('>>>', node.type, deep, node.name || node.value, node.uuid);
         let ret = func(node);
-        // log(node.type, node.name || node.value, node.uuid);
+        // log('<<<', node.type, deep, node.name || node.value, node.uuid);
         // setTimeout(function () {
         //     // 延迟打印，可以得到所有代码处理完之后的uuid
         //     log(node.type, node.name || node.value, node.uuid);
@@ -133,6 +135,9 @@ export function evaluateNode(node) {
             return ret;
         }
         return node;
+    }
+    else {
+        log(node.type, ' is not supported');
     }
     return node;
 }
@@ -211,11 +216,10 @@ export function assignUUID(from, to) {
     if (!from || !to) {
         return;
     }
-    let varFrom = getVariable(from, from.scope); 
     let varTo = getVariable(to, to.scope); 
     // 有variable就给variable赋值，对应Identifier
     // 其他的类型没有variable，就给node赋值
-    let uuid = (varFrom || from).uuid;
+    let uuid = getUUID(from);
     // 既给variable赋值uuid，也给node赋值uuid
     setUUID(varTo, uuid);
     setUUID(to, uuid);
