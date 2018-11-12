@@ -10,6 +10,9 @@ import {
     getVariable,
     getUUID,
     setUUID,
+    assignResult,
+    setResult,
+    getResult,
     assignUUID
 } from './util';
 
@@ -76,8 +79,12 @@ export function EmptyStatement(node) {
 
 export function Identifier(node) {
     setNodeUsed(node);
-    let def = ref.getByUUID(getUUID(node)).find(item => item.type === 'VariableDeclaration');
+    let def = ref.getByUUID(getUUID(node)).find(item => item.type === 'VariableDeclarator');
+    // if (node.name === 'idx') {
+    //     log(ref.getByUUID(getUUID(node)));
+    // }
     evaluateNode(def, true);
+    // log(getResult(node));
 
     return node;
 }
@@ -91,6 +98,22 @@ export function UnaryExpression(node) {
 export function UpdateExpression(node) {
     setNodeUsed(node);
     node.argument = evaluateNode(node.argument);
+    let variable = ref.getByUUID(getUUID(node.argument)).find(item => !item.type);
+    // let result = getResult(variable);
+
+    // if (variable) {
+    //     if (node.prefix) {
+    //     }
+    //     else {
+    //         if (node.operator === '++') {
+    //             setResult(node, result);
+    //         }
+    //         else if (node.operator === '--') {
+    //             setResult(node, result--);
+    //         }
+    //     }
+    // }
+    // log(getResult(node));
     return node;
 }
 
@@ -244,6 +267,7 @@ export function LabeledStatement(node) {
 
 export function Literal(node) {
     setNodeUsed(node);
+    setResult(node, node.value);
 }
 
 export function LogicalExpression(node) {
@@ -284,6 +308,7 @@ export function MemberExpression(node) {
     let obj = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'ArrayExpression');
     let key = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Literal');
     // log('obj>>>', node.object.name, getUUID(node.object));
+    // log(ref.getByUUID(getUUID(node.key)));
     if (obj && key) {
         let index = key.value;
         // 数组中的元素
@@ -393,6 +418,10 @@ export function VariableDeclarator(node) {
     node.id = evaluateNode(node.id);
     node.init = evaluateNode(node.init);
     assignUUID(node.init, node.id);
+
+    assignResult(node.init, node.id);
+    // log(getResult(node.init))
+    // log(getResult(node.id))
     return node;
 }
 

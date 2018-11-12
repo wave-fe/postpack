@@ -124,9 +124,9 @@ export function evaluateNode(node, deep = false) {
     let funcDeep = deep === true ? calculator[node.type + 'Deep'] : undefined;
     let func = funcDeep || calculator[node.type];
     if (func) {
-        // log('>>>', node.type, deep, node.name || node.value, node.uuid);
+        // indexLog('>>>', node.type, deep, node.name || node.value, node.uuid);
         let ret = func(node);
-        // log('<<<', node.type, deep, node.name || node.value, node.uuid);
+        // indexLog('<<<', node.type, deep, node.name || node.value, node.uuid);
         // setTimeout(function () {
         //     // 延迟打印，可以得到所有代码处理完之后的uuid
         //     log(node.type, node.name || node.value, node.uuid);
@@ -226,6 +226,35 @@ export function assignUUID(from, to) {
     // console.log(from.name, to.name);
     // to.uuid = from.uuid || to.uuid;
     // console.log(from.uuid, to.uuid);
+}
+
+export function assignResult(from, to) {
+    if (!from || !to) {
+        return;
+    }
+    setResult(to, getResult(from));
+}
+
+export function setResult(node, result) {
+    if (!node) {
+        return;
+    }
+    let variable = getVariable(node, node.scope);
+    if (variable) {
+        variable.result = result;
+    }
+    node.result = result;
+}
+
+export function getResult(node) {
+    if (!node) {
+        return;
+    }
+    let variable = getVariable(node, node.scope);
+    if (variable) {
+        return variable.result;
+    }
+    return node.result;
 }
 
 export function isModuleDefine(node) {

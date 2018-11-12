@@ -1,5 +1,5 @@
-function aa(arr) {
-    var a = arr[1];
+function aa(arr, idx) {
+    var a = arr[idx];
     a();
 }
 aa([
@@ -9,7 +9,7 @@ aa([
     function () {
         c = 2;
     }
-]);
+], 0);
 aa([
     function () {
         d = 3;
@@ -17,4 +17,4 @@ aa([
     function () {
         e = 4;
     }
-]);
+], 1);
