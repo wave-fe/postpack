@@ -1,6 +1,7 @@
-function aa(arr, idx) {
-    var a = arr[idx];
-    a();
+function aa(arr) {
+    return function (idx) {
+        arr[idx]();
+    };
 }
 aa([
     function () {
@@ -8,8 +9,14 @@ aa([
     },
     function () {
         c = 2;
+    },
+    function () {
+        d = 3;
+    },
+    function () {
+        e = 4;
     }
-], 0);
+])(2);
 aa([
     function () {
         d = 3;
@@ -17,4 +24,4 @@ aa([
     function () {
         e = 4;
     }
-], 1);
+])(0);

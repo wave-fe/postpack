@@ -167,6 +167,8 @@ export function CallExpression(node) {
         // log('>>>>');
         evaluateNode(callee, true);
         // log('<<<<');
+        let returnValue = callee.returnValue;
+        setUUID(node, returnValue);
         // assignUUID(callee, node);
         // 传递完参数再重新计算callee，让内部uuid正确
 
@@ -357,7 +359,9 @@ export function ReturnStatement(node) {
     setNodeUsed(node);
     node.argument = evaluateNode(node.argument);
     assignUUID(node.argument, node);
-    // log(node.scope);
+    let functionBlock = node.scope.block;
+    functionBlock.returnValue = getUUID(node);
+    // log(node.scope.block);
     return node;
 }
 
