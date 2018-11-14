@@ -3,6 +3,8 @@ import {
     isDefine,
     isGlobalRequire,
     isRequireNode,
+    isDataType,
+    isTrue,
     isModuleDefine,
     markRequire,
     setNodeUsed,
@@ -70,6 +72,13 @@ export function ConditionalExpression(node) {
     node.test = evaluateNode(node.test);
     node.consequent = evaluateNode(node.consequent);
     node.alternate = evaluateNode(node.alternate);
+    let test = ref.getByUUID(getUUID(node.test)).find(item => item.type === 'Literal');
+    if (test && test.value) {
+        assignUUID(node.consequent, node);
+    }
+    else {
+        assignUUID(node.alternate, node);
+    }
     return node;
 }
 
@@ -276,10 +285,11 @@ export function LogicalExpression(node) {
     setNodeUsed(node);
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
-    var leftVar = getVariable(node.left);
-    var rightVar = getVariable(node.right);
+
+    let leftVar = ref.getByUUID(getUUID(node.left)).find(isDataType);
+    let rightVar = ref.getByUUID(getUUID(node.right)).find(item => item.type === 'Literal');
     if (node.operator === '&&') {
-        if (leftVar) {
+        if (leftVar && isTrue(leftVar)) {
             assignUUID(node.right, node);
         }
         else {
@@ -287,7 +297,7 @@ export function LogicalExpression(node) {
         }
     }
     else if (node.operator === '||') {
-        if (leftVar) {
+        if (leftVar && isTrue(leftVar)) {
             assignUUID(node.left, node);
         }
         else {
@@ -305,21 +315,33 @@ export function MemberExpression(node) {
         // 如果是window，就按照property的uuid给当前node赋值
         assignUUID(node.property, node);
     }
+    // log(ref.getByUUID(getUUID(node.object)));
+
+    // 数组的处理
 
     // 传递数组内部元素的引用
-    let obj = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'ArrayExpression');
-    let key = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Literal');
-    // log('obj>>>', node.object.name, getUUID(node.object));
+    let arr = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'ArrayExpression');
+    let index = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Literal');
+    // log('arr>>>', node.object.name, getUUID(node.object));
     // log(ref.getByUUID(getUUID(node.key)));
-    if (obj && key) {
-        let index = key.value;
+    if (arr && index) {
         // 数组中的元素
-        let item = obj.elements[index];
+        let item = arr.elements[index.value];
         // log(item.type, item.name, item.uuid);
         if (item) {
             // 把元素的uuid传递给node
             assignUUID(item, node);
             // log(item);
+        }
+    }
+
+    // object的处理
+    let obj = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'ObjectExpression');
+    let key = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Identifier');
+    if (obj && key) {
+        let subNode = obj.properties.find(prop => prop.key.name === key.name);
+        if (subNode) {
+            assignUUID(subNode.value, node);
         }
     }
 

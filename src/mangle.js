@@ -1,4 +1,5 @@
 import {replace} from 'estraverse';
+import {valid} from './valid';
 import esquery from 'esquery';
 import {analyze} from 'escope';
 import {shake} from './shake';
@@ -59,6 +60,7 @@ export function process(ast) {
     // log(ast.body[1].expression.arguments[0].elements);
     // 把没标记的node删掉
     shake(ast);
+    valid(ast);
     // log(ast.body[1].expression.arguments[0].elements[1].body);
     // log(ref.toString());
     // console.log(ast.body[0]);

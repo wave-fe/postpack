@@ -280,3 +280,24 @@ export function isType(obj, type) {
     // console.log(({}).toString.call(obj));
     return ({}).toString.call(obj) === '[object ' + type + ']';
 }
+
+export function isTrue(node) {
+    if (!node) {
+        return false;
+    }
+    if (node.type === 'Literal') {
+        return !!node.value;
+    }
+    return true;
+}
+
+export function isDataType(node) {
+    switch (node.type) {
+        case 'Literal':
+        case 'ObjectExpression':
+        case 'ArrayExpression':
+            return true;
+        default:
+            return false;
+    }
+}
