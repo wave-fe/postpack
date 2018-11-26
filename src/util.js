@@ -8,6 +8,9 @@ import {ref} from './ref';
 
 import uuid from 'uuid/v4';
 
+import espurify from 'espurify';
+import esquery from 'esquery';
+
 export function isUsed(node) {
     return node && node.opt && node.opt.used;
 }
@@ -121,6 +124,7 @@ export function evaluateNode(node, deep = false) {
     if (!node) {
         return;
     }
+    debug(node);
     let funcDeep = deep === true ? calculator[node.type + 'Deep'] : undefined;
     let func = funcDeep || calculator[node.type];
     if (func) {
@@ -140,6 +144,16 @@ export function evaluateNode(node, deep = false) {
         log(node.type, ' is not supported');
     }
     return node;
+}
+
+function debug(node) {
+    if (node.leadingComments && node.leadingComments.length) {
+        let debugComment = node.leadingComments.find(item => /\s*debug\:/.test(item.value));
+        if (debugComment) {
+            let query = debugComment.value.trim().replace('debug:', '');
+            log('\n', espurify.customize({extra: ['uuid']})(esquery(node, query)[0]));
+        }
+    }
 }
 
 export function isDefine(uuid) {
@@ -301,3 +315,19 @@ export function isDataType(node) {
             return false;
     }
 }
+
+export function nodePath(node) {
+    let pathArr = [];
+    while (node = node.parent) {
+        let name = node.name || node.value;
+        pathArr.push(node.type + (name ? '(' + name + ')' : ''));
+    }
+    return '\n' + pathArr.reverse()
+        .map((item, index)=> 
+            (new Array(index))
+            .fill('  ')
+            .join('') + item
+        )
+        .join('\n');
+}
+

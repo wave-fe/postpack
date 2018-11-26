@@ -484,3 +484,8 @@ export function WhileStatement(node) {
     return node;
 }
 
+export function DebuggerStatement(node) {
+    setNodeUsed(node);
+    return node;
+}
+

@@ -27,6 +27,7 @@
     "escodegen": "^1.9.1",
     "escope": "^3.6.0",
     "espree": "^3.5.4",
+    "espurify": "^2.0.0",
     "esquery": "^1.0.1",
     "estraverse": "^4.2.0",
     "esvalid": "^1.1.0",
