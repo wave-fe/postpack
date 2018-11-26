@@ -25,6 +25,7 @@ export function ArrayExpression(node) {
 }
 
 export function AssignmentExpression(node) {
+    node.right = node.right || genUndefinedNode();
 }
 
 export function BlockStatement(node) {

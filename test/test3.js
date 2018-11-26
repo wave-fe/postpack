@@ -1,4 +1,3 @@
-console.log(hello);
 define('hello/world', function() {});
 eslxDefine('hello/world', function () {});
 require(['hello/world'], function (world) {

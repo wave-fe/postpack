@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "script/build.sh",
-    "test": "babel-node test/index.js"
+    "dev": "babel-node test/index.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0"
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.6.0"
   }
 }

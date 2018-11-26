@@ -33,6 +33,7 @@ export function AssignmentExpression(node) {
     node.left = evaluateNode(node.left);
     node.right = evaluateNode(node.right);
     assignUUID(node.right, node.left);
+    assignUUID(node.right, node);
     return node;
 }
 
@@ -163,16 +164,39 @@ export function CallExpression(node) {
     // log(!!callee, node.callee.name, getUUID(node.callee));
     // log(ref + '');
     if (callee) {
-        // log(callee.body.body[0].expression);
         let functionArgs = callee.params;
         // callee是function，可以传递引用给function的参数
         // 传入的参数可以和定义的参数数量不等，这里处理一下
-        node.arguments.map((arg, index) => {
-            let functionArg = functionArgs[index];
-            if (functionArg) {
-                assignUUID(arg, functionArg);
-            }
-        });
+        if (node.callee.callType === 'call') {
+            let pThis = node.arguments.shift();
+            node.arguments.map((arg, index) => {
+                let functionArg = functionArgs[index];
+                if (functionArg) {
+                    assignUUID(arg, functionArg);
+                }
+            });
+            callee.scope.pThis = pThis;
+        }
+        else if (node.callee.callType === 'apply') {
+            let pThis = node.arguments.shift();
+            let args = node.arguments.shift();
+            args.elements.map((arg, index) => {
+                let functionArg = functionArgs[index];
+                if (functionArg) {
+                    assignUUID(arg, functionArg);
+                }
+            });
+            callee.scope.pThis = pThis;
+        }
+        else {
+            node.arguments.map((arg, index) => {
+                let functionArg = functionArgs[index];
+                if (functionArg) {
+                    assignUUID(arg, functionArg);
+                }
+            });
+            callee.scope.pThis = undefined;
+        }
         // log('>>>>');
         evaluateNode(callee, true);
         // log('<<<<');
@@ -182,13 +206,6 @@ export function CallExpression(node) {
         // 传递完参数再重新计算callee，让内部uuid正确
 
     }
-    // log('<<<<<<<<<<<<<<<<<<');
-
-    // let uid = getUUID(node.callee);
-    // let refs = ref.getByUUID(node.callee.uuid);
-    // log(uid, refs);
-
-    // let variables = global.getByUUID()
     return node;
 }
 
@@ -204,7 +221,7 @@ export function ExpressionStatement(node) {
 }
 
 export function FunctionDeclaration(node) {
-    setNodeUsed(node);
+    // setNodeUsed(node);
     node.id = evaluateNode(node.id);
     // log(getUUID(node));
     assignUUID(node.id, node);
@@ -343,6 +360,15 @@ export function MemberExpression(node) {
         if (subNode) {
             assignUUID(subNode.value, node);
         }
+    }
+
+    // function call、apply的处理
+    let func = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'FunctionExpression');
+    let callOrApply = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Identifier');
+    let type = callOrApply.name;
+    if (func && (type === 'call' || type === 'apply')) {
+        assignUUID(func, node);
+        node.callType = type;
     }
 
 
