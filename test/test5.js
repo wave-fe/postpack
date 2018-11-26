@@ -8,7 +8,6 @@ function(t, n) {
 function() {
     return function(t) {
         function n(r) {
-            //debug:ReturnStatement
             if (e[r]) return e[r].exports;
             var o = e[r] = {
                 i: r,
@@ -364,6 +363,7 @@ function() {
     function(t, n, e) {
         "use strict";
         var r = {},
+        //debug:[name='e']
         o = e(11),
         i = e(3);
         r.platform = o.platform,

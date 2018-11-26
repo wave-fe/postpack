@@ -124,7 +124,9 @@ export function evaluateNode(node, deep = false) {
     if (!node) {
         return;
     }
-    debug(node);
+    debug(node, function (node, query) {
+        return ref.getByUUID(getUUID(node)).find(item => /function/i.test(item.type));
+    });
     let funcDeep = deep === true ? calculator[node.type + 'Deep'] : undefined;
     let func = funcDeep || calculator[node.type];
     if (func) {
@@ -146,12 +148,25 @@ export function evaluateNode(node, deep = false) {
     return node;
 }
 
-function debug(node) {
+function debug(node, customFormat) {
+    // 根据leadingComments判断是否要进入debug
     if (node.leadingComments && node.leadingComments.length) {
+        // debug的注释以debug:开头
         let debugComment = node.leadingComments.find(item => /\s*debug\:/.test(item.value));
         if (debugComment) {
+            // 切掉前面的debug:,后面是query
             let query = debugComment.value.trim().replace('debug:', '');
-            log('\n', espurify.customize({extra: ['uuid']})(esquery(node, query)[0]));
+            // 用esquery找到符合的node
+            let debugNode = esquery(node, query)[0];
+            if (customFormat) {
+                debugNode = customFormat(debugNode, query);
+            }
+            // 用espurify clone一遍，去掉干扰信息
+            let clonedDebugNode = espurify.customize({extra: ['']})(debugNode);
+            // 由于层级深的行号不显示，所以赋值到第一层，方便调试
+            clonedDebugNode.line = debugNode.loc.start.line;
+            clonedDebugNode.fromLine = node.loc.start.line;
+            log('\n', clonedDebugNode);
         }
     }
 }
