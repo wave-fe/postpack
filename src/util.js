@@ -124,9 +124,10 @@ export function evaluateNode(node, deep = false) {
     if (!node) {
         return;
     }
-    debug(node, function (node, query) {
-        return ref.getByUUID(getUUID(node)).find(item => /function/i.test(item.type));
-    });
+    // debug(node, function (node, query) {
+    //     return ref.getByUUID(getUUID(node)).find(item => /function/i.test(item.type));
+    // });
+    debug(node);
     let funcDeep = deep === true ? calculator[node.type + 'Deep'] : undefined;
     let func = funcDeep || calculator[node.type];
     if (func) {
@@ -148,6 +149,12 @@ export function evaluateNode(node, deep = false) {
     return node;
 }
 
+
+let commands = {
+    ref(node, type) {
+        return ref.getByUUID(getUUID(node)).find(item => item.type === type);
+    }
+};
 function debug(node, customFormat) {
     // 根据leadingComments判断是否要进入debug
     if (node.leadingComments && node.leadingComments.length) {
@@ -155,11 +162,21 @@ function debug(node, customFormat) {
         let debugComment = node.leadingComments.find(item => /\s*debug\:/.test(item.value));
         if (debugComment) {
             // 切掉前面的debug:,后面是query
-            let query = debugComment.value.trim().replace('debug:', '');
+            let [query, command] = debugComment.value.trim().replace('debug:', '').split('|');
             // 用esquery找到符合的node
             let debugNode = esquery(node, query)[0];
             if (customFormat) {
                 debugNode = customFormat(debugNode, query);
+            }
+            if (command) {
+                let [all, com, args] = /(\w+)\[([\w,]+)\]/.exec(command);
+                args = args.split(',');
+                args.unshift(node);
+                debugNode = commands[com].apply(undefined, args);
+                if (!debugNode) {
+                    log('not found');
+                    return;
+                }
             }
             // 用espurify clone一遍，去掉干扰信息
             let clonedDebugNode = espurify.customize({extra: ['']})(debugNode);
