@@ -152,7 +152,9 @@ export function evaluateNode(node, deep = false) {
 
 let commands = {
     ref(node, type) {
-        return ref.getByUUID(getUUID(node)).find(item => item.type === type);
+        let reg = new RegExp(type, 'i');
+        // log(ref.getByUUID(getUUID(node)));
+        return ref.getByUUID(getUUID(node)).find(item => reg.test(item.type));
     }
 };
 function debug(node, customFormat) {
@@ -168,22 +170,21 @@ function debug(node, customFormat) {
             if (customFormat) {
                 debugNode = customFormat(debugNode, query);
             }
-            if (command) {
+            if (debugNode && command) {
                 let [all, com, args] = /(\w+)\[([\w,]+)\]/.exec(command);
                 args = args.split(',');
-                args.unshift(node);
+                args.unshift(debugNode);
                 debugNode = commands[com].apply(undefined, args);
-                if (!debugNode) {
-                    log('not found');
-                    return;
-                }
+            }
+            if (!debugNode) {
+                log('line:', node.loc.start.line, 'not found');
+                return;
             }
             // 用espurify clone一遍，去掉干扰信息
             let clonedDebugNode = espurify.customize({extra: ['']})(debugNode);
             // 由于层级深的行号不显示，所以赋值到第一层，方便调试
             clonedDebugNode.line = debugNode.loc.start.line;
-            clonedDebugNode.fromLine = node.loc.start.line;
-            log('\n', clonedDebugNode);
+            log('line:', node.loc.start.line, '\n', clonedDebugNode);
         }
     }
 }

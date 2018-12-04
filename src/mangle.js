@@ -14,6 +14,7 @@ import {ref} from './ref';
 import parseOptions from './parseOptions';
 
 export function process(ast) {
+    // log(esquery(ast,'CallExpression>ArrayExpression>FunctionExpression').length)
     let scopeManager = analyze(ast, parseOptions);
     let currentScope = scopeManager.acquire(ast);
     // setUsed(ast);

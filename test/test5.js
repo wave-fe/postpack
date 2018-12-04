@@ -7,6 +7,7 @@ function(t, n) {
 } ("undefined" != typeof self ? self: this,
 function() {
     return function(t) {
+        //debug:[name='n']|ref[function]
         function n(r) {
             if (e[r]) return e[r].exports;
             var o = e[r] = {
@@ -14,11 +15,12 @@ function() {
                 l: !1,
                 exports: {}
             };
-            //debug:[name='n']|ref[Identifier]
+            //debug:[name='n']|ref[function]
             return t[r].call(o.exports, o, o.exports, n),
             o.l = !0,
             o.exports
         }
+        //n(3);
         var e = {};
         return n.m = t,
         n.c = e,
@@ -246,6 +248,7 @@ function() {
         void 0 !== (r = function(n) {
             "use strict";
             var r = e(0),
+            //debug:[name='e']|ref[Function]
             o = e(6),
             i = e(7),
             s = e(15),
@@ -271,6 +274,7 @@ function() {
             function r(t, n, e) {
                 for (var o in n) e && (i(n[o]) || s(n[o])) ? (i(n[o]) && !i(t[o]) && (t[o] = {}), s(n[o]) && !s(t[o]) && (t[o] = []), r(t[o], n[o], e)) : u(n[o]) || (t[o] = n[o])
             }
+            //debug:[name='e']|ref[Function]
             var o = e(0),
             i = o.isPlainObject,
             s = o.isArray,
@@ -364,8 +368,8 @@ function() {
     function(t, n, e) {
         "use strict";
         var r = {},
-        //d1ebug:[name='e']
         o = e(11),
+        //d ebug:[name='e']|ref[Function]
         i = e(3);
         r.platform = o.platform,
         r.init = function(t) {

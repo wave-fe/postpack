@@ -8,6 +8,10 @@ function genUndefinedNode() {
     return genNode('Identifier', {name: 'undefined'});
 }
 
+function genLiteral(value) {
+    return genNode('Literal', {value});
+}
+
 function genNode(type, args = {}) {
     return Object.assign({
         type,
@@ -112,6 +116,8 @@ export function ObjectExpression(node) {
 }
 
 export function Property(node) {
+    node.key = node.key || genLiteral(null);
+    node.value = node.value || genLiteral(null);
 }
 
 export function Program(node) {

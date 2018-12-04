@@ -7,6 +7,7 @@ export function valid(ast) {
     let errorMessage = errors.map(item => item.message + '\n' + nodePath(item.node)).join('\n');
     if (errorMessage) {
         log(errorMessage);
+        // log(errors[0].node);
         process.exit(1);
     }
 }
