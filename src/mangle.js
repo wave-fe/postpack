@@ -2,6 +2,7 @@ import {replace} from 'estraverse';
 import {valid} from './valid';
 import esquery from 'esquery';
 import {analyze} from 'escope';
+import {webpack} from './webpack';
 import {shake} from './shake';
 import {
     traverseNode,
@@ -13,31 +14,37 @@ import {
 import {ref} from './ref';
 import parseOptions from './parseOptions';
 
-export function process(ast) {
+export function process(astArr) {
     // log(esquery(ast,'CallExpression>ArrayExpression>FunctionExpression').length)
-    let scopeManager = analyze(ast, parseOptions);
-    let currentScope = scopeManager.acquire(ast);
-    // setUsed(ast);
-    // 设置所有node的scope
-    replace(ast, {
-        enter: function (node, parent) {
-            if (node !== parent) {
-                node.parent = parent;
-            }
-            node.opt = node.opt || {};
-            // 进入新的scope
-            currentScope = scopeManager.acquire(node) || currentScope;
-            currentScope.variables.map(v => setUUID(v));
-            // console.log(currentScope.references.map(r => r.identifier.name));
-            node.scope = currentScope;
+    astArr.map(ast => {
+        let scopeManager = analyze(ast, parseOptions);
+        let currentScope = scopeManager.acquire(ast);
+        // setUsed(ast);
+        // 设置所有node的scope
+        replace(ast, {
+            enter: function (node, parent) {
+                if (node !== parent) {
+                    node.parent = parent;
+                }
+                node.opt = node.opt || {};
+                // 进入新的scope
+                currentScope = scopeManager.acquire(node) || currentScope;
+                currentScope.variables.map(v => setUUID(v));
+                // console.log(currentScope.references.map(r => r.identifier.name));
+                node.scope = currentScope;
 
-            setUUID(node);
-        },
-        leave: function (node) {
-            currentScope = scopeManager.release(node) || currentScope;
-            // do stuff
-        }
+                setUUID(node);
+            },
+            leave: function (node) {
+                currentScope = scopeManager.release(node) || currentScope;
+                // do stuff
+            }
+        });
     });
+    let ast = {
+        type: 'Program',
+        body: astArr
+    };
     // log(ref.toString());
     // 先对所有节点进行计算
     ast = evaluateNode(ast);
@@ -60,6 +67,7 @@ export function process(ast) {
 
     // log(ast.body[1].expression.arguments[0].elements);
     // 把没标记的node删掉
+    webpack(ast);
     shake(ast);
     valid(ast);
     // log(ast.body[1].expression.arguments[0].elements[1].body);

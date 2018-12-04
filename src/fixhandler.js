@@ -22,9 +22,9 @@ function genNode(type, args = {}) {
 }
 
 export function ArrayExpression(node) {
-    // 数组缺项用undefined补上
+    // 数组缺项用null补上，这里不需要补一个节点类型，ArrayExpression的结构就是空的补null
     node.elements = node.elements.map(item => {
-        return isUsed(item) ? item : genUndefinedNode();
+        return isUsed(item) ? item : null;
     });
 }
 

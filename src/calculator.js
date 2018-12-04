@@ -31,7 +31,7 @@ export function ArrayExpression(node) {
 export function AssignmentExpression(node) {
     setNodeUsed(node);
     node.left = evaluateNode(node.left);
-    node.right = evaluateNode(node.right);
+    node.right = evaluateNode(node.right, node.left.type === 'MemberExpression' ? true : false);
     assignUUID(node.right, node.left);
     assignUUID(node.right, node);
     return node;
@@ -131,7 +131,7 @@ export function CallExpression(node) {
     setNodeUsed(node);
     // log('>>>>>>>>>>>>>>>>>');
     node.callee = evaluateNode(node.callee);
-    node.arguments = node.arguments.map(evaluateNode);
+    node.arguments = node.arguments.map(item => evaluateNode(item, true));
     let uuid = getUUID(node.callee);
 
     if (isDefine(uuid) && isModuleDefine(node)) {
@@ -168,9 +168,9 @@ export function CallExpression(node) {
         // callee是function，可以传递引用给function的参数
         // 传入的参数可以和定义的参数数量不等，这里处理一下
         if (node.callee.callType === 'call') {
-            let pThis = node.arguments.shift();
+            let pThis = node.arguments[0];
             node.arguments.map((arg, index) => {
-                let functionArg = functionArgs[index];
+                let functionArg = functionArgs[index + 1];
                 if (functionArg) {
                     assignUUID(arg, functionArg);
                 }
@@ -178,8 +178,8 @@ export function CallExpression(node) {
             callee.scope.pThis = pThis;
         }
         else if (node.callee.callType === 'apply') {
-            let pThis = node.arguments.shift();
-            let args = node.arguments.shift();
+            let pThis = node.arguments[0];
+            let args = node.arguments[1];
             args.elements.map((arg, index) => {
                 let functionArg = functionArgs[index];
                 if (functionArg) {
@@ -300,8 +300,10 @@ export function Literal(node) {
 
 export function LogicalExpression(node) {
     setNodeUsed(node);
-    node.left = evaluateNode(node.left);
-    node.right = evaluateNode(node.right);
+    // 因为LogicalExpression的子节点被删掉了实在没法处理，这是个逻辑问题，不是实现问题
+    // 所以就强制保留LogicalExpression的left和right
+    node.left = evaluateNode(node.left, true);
+    node.right = evaluateNode(node.right, true);
 
     let leftVar = ref.getByUUID(getUUID(node.left)).find(isDataType);
     let rightVar = ref.getByUUID(getUUID(node.right)).find(item => item.type === 'Literal');
@@ -364,11 +366,13 @@ export function MemberExpression(node) {
 
     // function call、apply的处理
     let func = ref.getByUUID(getUUID(node.object)).find(item => item.type === 'FunctionExpression');
-    let callOrApply = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Identifier');
-    let type = callOrApply.name;
-    if (func && (type === 'call' || type === 'apply')) {
-        assignUUID(func, node);
-        node.callType = type;
+    let callOrApplyOrBind = ref.getByUUID(getUUID(node.property)).find(item => item.type === 'Identifier');
+    if (callOrApplyOrBind) {
+        let type = callOrApplyOrBind.name;
+        if (func && (type === 'call' || type === 'apply' || type === 'bind')) {
+            assignUUID(func, node);
+            node.callType = type;
+        }
     }
 
 
@@ -392,7 +396,7 @@ export function ObjectExpression(node) {
 export function Property(node) {
     setNodeUsed(node);
     node.key = evaluateNode(node.key);
-    node.value = evaluateNode(node.value);
+    node.value = evaluateNode(node.value, true);
     node.alternate = evaluateNode(node.alternate);
     return node;
 }

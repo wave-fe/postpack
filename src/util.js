@@ -10,6 +10,7 @@ import uuid from 'uuid/v4';
 
 import espurify from 'espurify';
 import esquery from 'esquery';
+import fs from 'fs';
 
 export function isUsed(node) {
     return node && node.opt && node.opt.used;
@@ -364,3 +365,26 @@ export function nodePath(node) {
         .join('\n');
 }
 
+export function writeFile(filePath, data) {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, data, function (err, data) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(data);
+        });
+    });
+}
+
+export function readFile(filePath) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, function (err, data) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(data);
+        });
+    });
+}

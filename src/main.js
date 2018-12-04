@@ -1,6 +1,7 @@
 import espree from 'espree';
-import escodegen from 'escodegen';
+import {genCode} from './gencode';
 import parseOptions from './parseOptions';
+import espurify from 'espurify';
 import {process} from './mangle';
 import tracer from 'tracer';
 // 搞一个全局的log，方便
@@ -21,15 +22,15 @@ global.indexLog = function (...args) {
     args.unshift(prefix.join(''));
     log.call(null, ...args);
 }
-export function repack(code) {
-    // 解析成ast
-    let ast = espree.parse(code, parseOptions);
+export async function repack(arr) {
+    let astArr = arr.map(({code, filePath}) => {
+        // 解析成ast
+        let ast = espree.parse(code, parseOptions);
+        ast.filePath = filePath;
+        return ast;
+    });
     // 处理ast
-    process(ast);
+    let mergedAst = process(astArr);
     // 重新生成代码
-    let generatedCode = escodegen.generate(ast);
-    return {
-        ast,
-        code: generatedCode
-    };
+    return await genCode(mergedAst);
 }
